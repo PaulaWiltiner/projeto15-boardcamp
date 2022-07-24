@@ -3,6 +3,9 @@ import dayjs from "dayjs";
 
 export async function postRentals(req, res) {
   try {
+    const price = await connection.query(
+      `SELECT ("pricePerDay") FROM games WHERE id=${req.body.gameId}`
+    );
     const date = dayjs().format("YYYY-MM-DD");
     const priceTotal = price.rows[0].pricePerDay * req.body.daysRented;
 
@@ -12,6 +15,7 @@ export async function postRentals(req, res) {
     );
     return res.sendStatus(201);
   } catch (err) {
+    console.log(err);
     return res.sendStatus(500);
   }
 }
@@ -42,16 +46,11 @@ export async function postRentalsReturn(req, res) {
 
 export async function getRentals(req, res) {
   try {
-    const { customerId } = req.query;
-    const { gameId } = req.query;
-    let gameid = '"gameId"';
-    let customerid = '"customerId"';
-    if (customerId) {
-      customerid = customerId;
-    }
-    if (gameId) {
-      gameid = gameId;
-    }
+    const { customerId, offset, limit, gameId } = req.query;
+    let gameid = gameId ? gameId : '"gameId"';
+    let customerid = customerId ? customerId : '"customerId"';
+    let offsetRental = offset ? offset : "0";
+    let limitRental = limit ? `LIMIT ${limit}` : ``;
     const query = await connection.query(`
                               SELECT rentals.*, 
                               FORMAT("rentDate"::text,'YYYY-MM-DD') as "rentDate", 
@@ -61,7 +60,9 @@ export async function getRentals(req, res) {
                               FROM rentals
                               JOIN customers ON customers.id = "customerId"
                               JOIN games ON games.id ="gameId"
-                              WHERE "customerId"=${customerid} AND "gameId"=${gameid}`);
+                              WHERE "customerId"=${customerid} AND "gameId"=${gameid}
+                              ${limitRental} OFFSET ${offsetRental}
+                              `);
     const list = query.rows;
     const response = list.map((item) => {
       const listCustomer = item.customer.replace(/[\\"()]/g, "").split(",", 2);
