@@ -3,7 +3,7 @@ import connection from "../dbStrategy/postgres.js";
 export async function postGames(req, res) {
   try {
     await connection.query(
-      `INSERT INTO categories (name) VALUES (${req.body.name})`
+      `INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ('${req.body.name}','${req.body.image}', '${req.body.stockTotal}', '${req.body.categoryId}', '${req.body.pricePerDay}')`
     );
     return res.sendStatus(201);
   } catch (err) {
@@ -13,7 +13,17 @@ export async function postGames(req, res) {
 
 export async function getGames(req, res) {
   try {
-    const query = await connection.query(`SELECT * FROM categories `);
+    const { name } = req.query;
+    if (name) {
+      const queryName = await connection.query(
+        `SELECT * FROM games WHERE name LIKE '${name}%'`
+      );
+      const response = queryName.rows;
+      return res.status(200).send(response);
+    }
+    const query = await connection.query(
+      `SELECT games.*, categories.name FROM games JOIN categories ON games."categoryId" = categories.id`
+    );
     const response = query.rows;
     return res.status(201).send(response);
   } catch (err) {
