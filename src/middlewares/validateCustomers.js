@@ -20,12 +20,9 @@ export async function validateCustomers(req, res, next) {
     return res.sendStatus(400);
   }
   const { id } = req.params;
-  console.log(id);
   const cpf = await connection.query(
     `SELECT * FROM customers WHERE cpf='${req.body.cpf}'`
   );
-
-  console.log(cpf.rows);
 
   if (cpf.rows.length !== 0 && cpf.rows[0].id !== Number(id)) {
     return res.sendStatus(409);
