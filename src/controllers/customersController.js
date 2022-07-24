@@ -13,18 +13,25 @@ export async function postCustomers(req, res) {
 
 export async function getCustomers(req, res) {
   try {
-    const { cpf, limit, offset } = req.query;
-    let offsetRental = offset ? offset : "0";
-    let limitRental = limit ? `LIMIT ${limit}` : ``;
+    const { cpf, limit, offset, order, desc } = req.query;
+    let descCustomers = desc ? `DESC` : ``;
+    let orderCustomers = order ? `ORDER BY ${order}` : ``;
+    let offsetCustomers = offset ? offset : "0";
+    let limitCustomers = limit ? `LIMIT ${limit}` : ``;
     if (cpf) {
       const queryName = await connection.query(
-        `SELECT *, FORMAT(birthday::text,'YYYY-MM-DD') as birthday FROM customers WHERE cpf LIKE '${cpf}%' ${limitRental} OFFSET ${offsetRental}`
+        `SELECT *, FORMAT(birthday::text,'YYYY-MM-DD') as birthday FROM customers 
+        WHERE cpf LIKE '${cpf}%' 
+        ${orderCustomers}  ${descCustomers} 
+        ${limitCustomers} OFFSET ${offsetCustomers}`
       );
       const response = queryName.rows;
       return res.status(200).send(response);
     }
     const query = await connection.query(
-      `SELECT *, FORMAT(birthday::text,'YYYY-MM-DD') as birthday FROM customers ${limitRental} OFFSET ${offsetRental}`
+      `SELECT *, FORMAT(birthday::text,'YYYY-MM-DD') as birthday FROM customers  
+      ${orderCustomers} ${descCustomers} 
+      ${limitCustomers} OFFSET ${offsetCustomers}`
     );
     const response = query.rows;
     return res.status(200).send(response);

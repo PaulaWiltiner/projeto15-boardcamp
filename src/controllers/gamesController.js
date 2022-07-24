@@ -13,18 +13,25 @@ export async function postGames(req, res) {
 
 export async function getGames(req, res) {
   try {
-    const { name, offset, limit } = req.query;
-    let offsetRental = offset ? offset : "0";
-    let limitRental = limit ? `LIMIT ${limit}` : ``;
+    const { name, offset, limit, order, desc } = req.query;
+    let descGames = desc ? `DESC` : ``;
+    let orderGames = order ? `ORDER BY ${order}` : ``;
+    let offsetGames = offset ? offset : "0";
+    let limitGames = limit ? `LIMIT ${limit}` : ``;
     if (name) {
       const queryName = await connection.query(
-        `SELECT * FROM games WHERE name LIKE '${name}%' ${limitRental} OFFSET ${offsetRental}`
+        `SELECT * FROM games WHERE name LIKE '${name}%' 
+        ${orderGames} ${descGames} 
+        ${limitGames} OFFSET ${offsetGames}`
       );
       const response = queryName.rows;
       return res.status(200).send(response);
     }
     const query = await connection.query(
-      `SELECT games.*, categories.name as "categoryName" FROM games JOIN categories ON games."categoryId" = categories.id ${limitRental} OFFSET ${offsetRental}`
+      `SELECT games.*, categories.name as "categoryName" FROM games 
+      JOIN categories ON games."categoryId" = categories.id 
+      ${orderGames} ${descGames}  
+      ${limitGames} OFFSET ${offsetGames}`
     );
     const response = query.rows;
     return res.status(201).send(response);

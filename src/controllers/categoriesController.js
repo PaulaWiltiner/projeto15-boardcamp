@@ -13,15 +13,20 @@ export async function postCategories(req, res) {
 
 export async function getCategories(req, res) {
   try {
-    const { limit, offset } = req.query;
-    let offsetRental = offset ? offset : "0";
-    let limitRental = limit ? `LIMIT ${limit}` : ``;
+    const { limit, offset, order, desc } = req.query;
+    let descCateg = desc ? `DESC` : ``;
+    let orderCateg = order ? `ORDER BY ${order}` : ``;
+    let offsetCateg = offset ? offset : "0";
+    let limitCateg = limit ? `LIMIT ${limit}` : ``;
     const query = await connection.query(
-      `SELECT * FROM categories ${limitRental} OFFSET ${offsetRental}`
+      `SELECT * FROM categories 
+      ${orderCateg} ${descCateg}  
+      ${limitCateg} OFFSET ${offsetCateg} `
     );
     const response = query.rows;
     return res.status(200).send(response);
   } catch (err) {
+    console.log(err);
     return res.sendStatus(500);
   }
 }
