@@ -105,10 +105,20 @@ export async function deleteRentals(req, res) {
 
 export async function getMetrics(req, res) {
   try {
+    const { startDate, endDate } = req.query;
+    let startDateRental = startDate
+      ? `WHERE "rentDate" BETWEEN '${dayjs(startDate).format(
+          "YYYY-MM-DDTHH:mm:ss[Z]"
+        )}' `
+      : ``;
+    let endDateRental = endDate
+      ? `AND'${dayjs(endDate).format("YYYY-MM-DDTHH:mm:ss[Z]")}' `
+      : ``;
     const query = await connection.query(`
                               SELECT SUM("originalPrice" + "delayFee" ) as revenue, 
                               COUNT(id) as rentals
                               FROM rentals
+                              ${startDateRental} ${endDateRental}
                               `);
     const response = {
       revenue: Number(query.rows[0].revenue),
