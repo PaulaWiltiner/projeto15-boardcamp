@@ -26,7 +26,6 @@ export async function getCategories(req, res) {
     const response = query.rows;
     return res.status(200).send(response);
   } catch (err) {
-    console.log(err);
     return res.sendStatus(500);
   }
 }

@@ -46,7 +46,15 @@ export async function postRentalsReturn(req, res) {
 
 export async function getRentals(req, res) {
   try {
-    const { customerId, offset, limit, gameId } = req.query;
+    const { customerId, offset, limit, gameId, status, startDate } = req.query;
+    let startDateRental = startDate
+      ? `AND "rentDate" >= '${dayjs(startDate).format(
+          "YYYY-MM-DDTHH:mm:ss[Z]"
+        )}' `
+      : ``;
+    let statusOpen = status === "open" ? `AND "returnDate" IS NULL` : ``;
+    let statusClosed =
+      status === "closed" ? `AND "returnDate" IS NOT NULL` : ``;
     let gameid = gameId ? gameId : '"gameId"';
     let customerid = customerId ? customerId : '"customerId"';
     let offsetRental = offset ? offset : "0";
@@ -60,7 +68,7 @@ export async function getRentals(req, res) {
                               FROM rentals
                               JOIN customers ON customers.id = "customerId"
                               JOIN games ON games.id ="gameId"
-                              WHERE "customerId"=${customerid} AND "gameId"=${gameid}
+                              WHERE "customerId"=${customerid} AND "gameId"=${gameid} ${statusOpen} ${statusClosed} ${startDateRental} 
                               ${limitRental} OFFSET ${offsetRental}
                               `);
     const list = query.rows;
